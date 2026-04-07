@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imperial Sentinel — ITI Intelligence Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300&family=JetBrains+Mono:wght@300;400;500;600&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- QR Code library for UPI -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --obs:#050608; --void:#080a0d; --carbon:#0d1117; --steel:#131820;
+  --slate:#1a2233; --iron:#222d3d; --zinc:#2d3d52; --silver:#4a5f7a;
+  --ash:#6b7f99; --mist:#8fa5bf; --ghost:#b8cad9; --ivory:#dde8f0;
+  --white:#f0f5fa; --gold:#c9a84c; --gold-dim:#8a6d2f; --ember:#e05c2a;
+  --ember-dim:#8a3515; --cyan:#1fb8d4; --sentinel-blue:#1B4FBF;
+  --sentinel-orange:#E8600A; --green:#2ecc71;
+  --glow-gold:rgba(201,168,76,0.15); --glow-ember:rgba(224,92,42,0.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--obs);color:var(--ivory);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);pointer-events:none;z-index:0}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:60px;background:rgba(5,6,8,0.94);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.1)}
+.topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold) 30%,var(--ember) 70%,transparent);opacity:0.35}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-hex{width:34px;height:34px;background:linear-gradient(135deg,rgba(201,168,76,0.12),rgba(224,92,42,0.06));border:1px solid var(--gold-dim);display:flex;align-items:center;justify-content:center;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)}
+.brand-text .n{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;letter-spacing:3px;color:var(--ivory);text-transform:uppercase}
+.brand-text .s{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:2.5px;color:var(--gold);text-transform:uppercase;margin-top:1px}
+.topbar-right{display:flex;align-items:center;gap:20px}
+.tier-pill{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;padding:4px 10px;border:1px solid var(--gold-dim);color:var(--gold);text-transform:uppercase;background:rgba(201,168,76,0.06);display:none}
+.tier-pill.show{display:block}
+.status-node{width:7px;height:7px;border-radius:50%;background:var(--zinc)}
+.status-node.live{background:var(--green);box-shadow:0 0 8px rgba(46,204,113,0.5);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.45}}
+.nav-btn{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;padding:6px 14px;border:1px solid var(--iron);color:var(--ash);background:transparent;cursor:pointer;text-transform:uppercase;transition:all .2s}
+.nav-btn:hover,.nav-btn.active{border-color:var(--gold-dim);color:var(--gold);background:rgba(201,168,76,0.05)}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:100vh;padding-top:60px;position:relative;z-index:1}
+
+/* ── LEFT RAIL ── */
+.left-rail{width:300px;flex-shrink:0;background:var(--void);border-right:1px solid rgba(201,168,76,0.07);display:flex;flex-direction:column;overflow-y:auto}
+.left-rail::-webkit-scrollbar{width:3px}
+.left-rail::-webkit-scrollbar-thumb{background:var(--iron)}
+.rail-sec{padding:22px 20px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.rail-label{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:3px;color:var(--silver);text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.rail-label::before{content:'';width:12px;height:1px;background:var(--gold)}
+.f-input{width:100%;background:var(--carbon);border:1px solid var(--iron);color:var(--ivory);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1.5px;padding:10px 14px;outline:none;transition:border-color .3s;margin-bottom:8px}
+.f-input:focus{border-color:var(--gold-dim)}
+.f-input::placeholder{color:var(--silver);font-size:10px}
+.f-input.ok{border-color:var(--green)}
+.f-input.err{border-color:var(--ember)}
+.f-btn{width:100%;padding:10px;background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(224,92,42,0.08));border:1px solid var(--gold-dim);color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;cursor:pointer;transition:all .3s}
+.f-btn:hover{background:linear-gradient(135deg,rgba(201,168,76,0.25),rgba(224,92,42,0.16));box-shadow:0 0 18px rgba(201,168,76,0.12)}
+.key-status{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:1px;min-height:16px;color:var(--silver);margin-top:8px}
+.key-status.ok{color:var(--green)}
+.key-status.err{color:var(--ember)}
+
+/* TIER CARDS */
+.tier-card{padding:12px 14px;border:1px solid var(--iron);margin-bottom:7px;cursor:pointer;transition:all .25s;position:relative;background:var(--carbon)}
+.tier-card:hover:not(.locked){border-color:var(--zinc);background:var(--steel)}
+.tier-card.locked{opacity:.38;cursor:not-allowed}
+.tier-card.selected{border-color:var(--gold-dim);background:linear-gradient(135deg,rgba(201,168,76,0.08),rgba(224,92,42,0.04))}
+.tier-card.selected::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(180deg,var(--gold),var(--ember))}
+.t-name{font-size:12px;font-weight:700;letter-spacing:2px;color:var(--ivory);text-transform:uppercase}
+.t-price{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);margin-top:2px}
+.t-cap{font-size:10px;color:var(--ash);margin-top:3px}
+.t-lock{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:10px}
+.t-check{color:var(--gold)}
+
+/* HISTORY */
+.sess-list{display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto}
+.sess-item{padding:8px 10px;border:1px solid var(--iron);font-size:10px;color:var(--ash);background:var(--carbon);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .2s;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+.sess-item:hover{border-color:var(--zinc);color:var(--ivory)}
+.sess-item.cur{border-color:var(--gold-dim);color:var(--ivory)}
+.new-sess{display:flex;align-items:center;gap:8px;width:calc(100% - 40px);margin:16px 20px 4px;padding:9px 14px;border:1px solid var(--iron);background:var(--carbon);color:var(--ash);font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.new-sess:hover{border-color:var(--gold-dim);color:var(--gold)}
+
+/* ── CHAT CENTER ── */
+.chat-center{flex:1;display:flex;flex-direction:column;background:var(--carbon);min-width:0}
+
+/* HERO */
+.hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 40px;text-align:center}
+.hero-ring{width:90px;height:90px;margin:0 auto 36px;position:relative}
+.hero-ring svg{width:100%;height:100%;animation:spin 18s linear infinite;filter:drop-shadow(0 0 24px rgba(201,168,76,0.28))}
+.hero-ring-inner{position:absolute;inset:22px;display:flex;align-items:center;justify-content:center;animation:spin 18s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:300;letter-spacing:10px;text-transform:uppercase;line-height:1;margin-bottom:8px}
+.hero-title span{background:linear-gradient(135deg,var(--gold),var(--ember));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-tag{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:4px;color:var(--silver);text-transform:uppercase;margin-bottom:44px}
+.hero-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--iron);max-width:600px;width:100%;margin-bottom:36px}
+.h-cell{background:var(--carbon);padding:20px 16px;text-align:left}
+.h-icon{font-size:16px;margin-bottom:8px;opacity:.65}
+.h-ttl{font-size:10px;font-weight:700;letter-spacing:2px;color:var(--ivory);text-transform:uppercase;margin-bottom:5px}
+.h-desc{font-size:10px;color:var(--ash);line-height:1.5}
+.hero-alert{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ember);border:1px solid rgba(224,92,42,0.28);padding:10px 20px;background:rgba(224,92,42,0.04);display:none}
+.hero-alert.show{display:block}
+
+/* MESSAGES */
+.msgs{flex:1;overflow-y:auto;padding:28px 36px;display:none;flex-direction:column;gap:0}
+.msgs.on{display:flex}
+.msgs::-webkit-scrollbar{width:3px}
+.msgs::-webkit-scrollbar-thumb{background:var(--iron)}
+.msg{display:flex;gap:16px;padding:20px 0;border-bottom:1px solid rgba(255,255,255,0.03);animation:msgIn .3s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.m-av{width:34px;height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px}
+.m-av.s{background:linear-gradient(135deg,rgba(201,168,76,0.15),rgba(224,92,42,0.08));border:1px solid var(--gold-dim);color:var(--gold)}
+.m-av.u{background:var(--steel);border:1px solid var(--iron);color:var(--ash)}
+.m-body{flex:1;min-width:0}
+.m-role{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;color:var(--silver)}
+.m-role.sr{color:var(--gold)}
+.m-text{font-size:14px;line-height:1.8;color:var(--ivory);word-wrap:break-word}
+.m-text h1,.m-text h2,.m-text h3{font-family:'Cormorant Garamond',serif;font-weight:500;letter-spacing:2px;text-transform:uppercase;margin:14px 0 6px}
+.m-text h2{font-size:17px;color:var(--gold)}
+.m-text h3{font-size:13px;color:var(--mist)}
+.m-text strong{color:var(--gold);font-weight:600}
+.m-text em{color:var(--ghost)}
+.m-text code{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--steel);border:1px solid var(--iron);padding:2px 6px;color:var(--cyan)}
+.m-text pre{background:var(--void);border:1px solid var(--iron);border-left:2px solid var(--gold-dim);padding:18px;margin:10px 0;overflow-x:auto;font-family:'JetBrains Mono',monospace;font-size:11px;line-height:1.65;color:var(--ivory);position:relative}
+.m-text pre code{background:none;border:none;padding:0;color:var(--ivory)}
+.m-text table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12px}
+.m-text th{background:var(--steel);border:1px solid var(--iron);padding:7px 10px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:2px;color:var(--gold);text-transform:uppercase}
+.m-text td{border:1px solid var(--iron);padding:7px 10px;color:var(--ghost)}
+.m-text ul,.m-text ol{padding-left:18px;margin:6px 0}
+.m-text li{margin-bottom:4px}
+.copy-wrap{position:relative}
+.copy-wrap .cpbtn{position:absolute;top:6px;right:6px;font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:1px;padding:3px 8px;background:var(--steel);border:1px solid var(--iron);color:var(--silver);cursor:pointer;text-transform:uppercase;transition:all .2s}
+.copy-wrap .cpbtn:hover{color:var(--gold);border-color:var(--gold-dim)}
+
+/* TYPING */
+.typing{display:none;padding:20px 36px;gap:16px;align-items:center}
+.typing.on{display:flex}
+.tdots{display:flex;gap:5px}
+.tdots span{width:5px;height:5px;background:var(--gold-dim);border-radius:50%;animation:tdot 1.2s ease infinite}
+.tdots span:nth-child(2){animation-delay:.2s}
+.tdots span:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-7px);opacity:.5}}
+
+/* INPUT */
+.input-zone{padding:20px 36px 28px;border-top:1px solid rgba(255,255,255,0.04)}
+.qcmds{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.qcmd{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 10px;border:1px solid var(--iron);color:var(--ash);background:var(--void);cursor:pointer;transition:all .2s;text-transform:uppercase;white-space:nowrap}
+.qcmd:hover{border-color:var(--gold-dim);color:var(--gold);background:rgba(201,168,76,0.04)}
+.inp-wrap{display:flex;border:1px solid var(--iron);background:var(--void);transition:border-color .3s}
+.inp-wrap:focus-within{border-color:var(--gold-dim);box-shadow:0 0 18px rgba(201,168,76,0.05)}
+.inp-wrap.locked{opacity:.45;pointer-events:none}
+.chat-inp{flex:1;background:transparent;border:none;outline:none;color:var(--ivory);font-family:'Rajdhani',sans-serif;font-size:14px;padding:14px 18px;resize:none;min-height:52px;max-height:160px;line-height:1.5}
+.chat-inp::placeholder{color:var(--silver)}
+.send-btn{padding:0 22px;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(224,92,42,0.1));border:none;border-left:1px solid var(--iron);color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;transition:all .3s;text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.send-btn:hover{background:linear-gradient(135deg,rgba(201,168,76,0.3),rgba(224,92,42,0.2));color:var(--ivory)}
+.send-btn:disabled{opacity:.35;cursor:not-allowed}
+.inp-meta{display:flex;justify-content:space-between;margin-top:8px;padding:0 3px}
+.inp-hint{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:1px;color:var(--silver);text-transform:uppercase}
+.charcnt{font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--zinc)}
+
+/* ── RIGHT RAIL ── */
+.right-rail{width:248px;flex-shrink:0;background:var(--void);border-left:1px solid rgba(201,168,76,0.07);display:flex;flex-direction:column;overflow-y:auto}
+.right-rail::-webkit-scrollbar{width:3px}
+.right-rail::-webkit-scrollbar-thumb{background:var(--iron)}
+.rr-card{padding:18px;border-bottom:1px solid rgba(255,255,255,0.04)}
+.rr-lbl{font-family:'JetBrains Mono',monospace;font-size:7px;letter-spacing:3px;color:var(--silver);text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.rr-lbl::before{content:'';width:8px;height:1px;background:var(--gold)}
+.rr-val{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--ivory);letter-spacing:-0.5px}
+.rr-val.g{color:var(--gold)}
+.rr-val.e{color:var(--ember)}
+.rr-sub{font-size:9px;color:var(--ash);margin-top:3px;letter-spacing:.5px}
+.cap-row{display:flex;align-items:center;gap:7px;padding:7px 8px;background:var(--carbon);border:1px solid var(--iron);font-size:9.5px;color:var(--ash);margin-bottom:5px;letter-spacing:.5px}
+.cdot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.cdot.on{background:var(--green);box-shadow:0 0 5px rgba(46,204,113,0.4)}
+.cdot.off{background:var(--iron)}
+
+/* ── PAYMENT MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(5,6,8,0.92);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+.modal-bg.hide{display:none}
+.modal{width:520px;background:var(--carbon);border:1px solid var(--gold-dim);padding:44px;position:relative;max-height:90vh;overflow-y:auto}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--ember))}
+.modal-ttl{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:400;letter-spacing:5px;text-transform:uppercase;color:var(--ivory);margin-bottom:6px}
+.modal-sub{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:2px;color:var(--silver);text-transform:uppercase;margin-bottom:30px}
+.modal-inp{width:100%;background:var(--void);border:1px solid var(--iron);color:var(--ivory);font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;padding:13px 14px;outline:none;transition:border-color .3s;margin-bottom:12px}
+.modal-inp:focus{border-color:var(--gold-dim)}
+.modal-inp::placeholder{color:var(--silver);font-size:10px}
+.modal-btn{width:100%;padding:13px;background:linear-gradient(135deg,rgba(201,168,76,0.2),rgba(224,92,42,0.1));border:1px solid var(--gold-dim);color:var(--gold);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;cursor:pointer;transition:all .3s;margin-bottom:10px}
+.modal-btn:hover{background:linear-gradient(135deg,rgba(201,168,76,0.3),rgba(224,92,42,0.2));box-shadow:0 0 24px rgba(201,168,76,0.14)}
+.modal-skip{text-align:center;font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:2px;color:var(--silver);cursor:pointer;text-transform:uppercase;transition:color .2s;margin-top:6px}
+.modal-skip:hover{color:var(--ivory)}
+.modal-note{font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:.8px;color:var(--zinc);margin-top:14px;line-height:1.7;text-align:center}
+
+/* PAYMENT TABS */
+.pay-tabs{display:flex;gap:0;margin-bottom:20px;border:1px solid var(--iron)}
+.pay-tab{flex:1;padding:9px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;text-align:center;cursor:pointer;border:none;background:var(--void);color:var(--silver);transition:all .2s}
+.pay-tab.on{background:rgba(201,168,76,0.08);color:var(--gold);border-bottom:1px solid var(--gold)}
+.pay-pane{display:none}
+.pay-pane.on{display:block}
+.pay-tier-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.pay-tier-opt{padding:10px 12px;border:1px solid var(--iron);cursor:pointer;background:var(--void);transition:all .2s}
+.pay-tier-opt:hover{border-color:var(--zinc)}
+.pay-tier-opt.sel{border-color:var(--gold);background:rgba(201,168,76,0.07)}
+.pay-tier-opt .ptn{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--ivory);text-transform:uppercase}
+.pay-tier-opt .ptp{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);margin-top:2px}
+.upi-qr-box{background:var(--void);border:1px solid var(--iron);padding:20px;text-align:center;margin:14px 0}
+#qrCanvas{margin:0 auto}
+.upi-link{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);word-break:break-all;margin-top:10px;padding:8px;border:1px solid var(--iron);background:var(--carbon);text-align:left}
+.pay-steps{margin-top:14px}
+.pay-step{display:flex;gap:10px;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:11px;color:var(--ash)}
+.pay-step-n{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--gold);flex-shrink:0;width:16px}
+.gst-box{background:var(--void);border:1px solid var(--iron);padding:14px;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:9px;line-height:1.8;color:var(--ash)}
+.gst-box .gl{display:flex;justify-content:space-between}
+.gst-box .gl.total{color:var(--ivory);border-top:1px solid var(--iron);margin-top:6px;padding-top:6px}
+.gst-box .gl.total span{color:var(--gold)}
+
+/* BACKEND CONFIG MODAL */
+.backend-note{background:var(--void);border:1px solid var(--ember-dim);padding:12px;margin-bottom:16px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ember);letter-spacing:.5px;line-height:1.7}
+.be-inp-row{display:flex;gap:8px;margin-bottom:8px}
+.be-inp-row .f-input{margin-bottom:0;flex:1}
+
+@media(max-width:960px){.right-rail{display:none}}
+@media(max-width:680px){.left-rail{display:none}.topbar,.msgs,.input-zone{padding-left:20px;padding-right:20px}}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     INIT MODAL
+════════════════════════════════════════════════ -->
+<div class="modal-bg" id="initModal">
+  <div class="modal">
+    <div class="modal-ttl">Imperial<br><span style="background:linear-gradient(135deg,var(--gold),var(--ember));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Sentinel</span></div>
+    <div class="modal-sub">ITI Intelligence Engine · OS V5.0 · System Initialization</div>
+
+    <div class="backend-note">
+      ◈ BACKEND MODE: Enter your backend URL to route API calls securely.<br>
+      ◈ DIRECT MODE: Enter OpenAI key directly (client-side, dev/testing only).
+    </div>
+
+    <!-- Backend URL -->
+    <input class="modal-inp" id="mBackendUrl" placeholder="BACKEND URL (https://your-api.domain.com) — RECOMMENDED" type="url">
+
+    <!-- OR direct OpenAI key -->
+    <input class="modal-inp" id="mOpenAIKey" type="password" placeholder="OPENAI API KEY (DIRECT MODE — sk-...)">
+
+    <!-- Sentinel Key -->
+    <input class="modal-inp" id="mSentinelKey" type="text" placeholder="SENTINEL ACCESS KEY (optional — for full tier unlock)">
+
+    <button class="modal-btn" onclick="bootSystem()">INITIALIZE IMPERIAL SENTINEL</button>
+    <div class="modal-skip" onclick="demoMode()">ENTER RESTRICTED DEMO MODE →</div>
+    <div class="modal-note">
+      Backend mode: API keys never touch the browser.<br>
+      Direct mode: Key stored in session memory only, never transmitted elsewhere.
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     PAYMENT MODAL
+════════════════════════════════════════════════ -->
+<div class="modal-bg hide" id="payModal">
+  <div class="modal">
+    <div class="modal-ttl">Unlock <span style="color:var(--gold)">Sentinel</span></div>
+    <div class="modal-sub">Subscribe · Authenticate · Deploy — GST Compliant Invoicing</div>
+
+    <!-- Tier Selection -->
+    <div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--silver);text-transform:uppercase;margin-bottom:10px">SELECT TIER</div>
+    <div class="pay-tier-grid" id="payTierGrid">
+      <div class="pay-tier-opt" onclick="selectPayTier(1,this)"><div class="ptn">Scout</div><div class="ptp">₹5,000/yr</div></div>
+      <div class="pay-tier-opt" onclick="selectPayTier(2,this)"><div class="ptn">Warden</div><div class="ptp">₹5,500/yr</div></div>
+      <div class="pay-tier-opt" onclick="selectPayTier(3,this)"><div class="ptn">Commander</div><div class="ptp">₹6,000/yr</div></div>
+      <div class="pay-tier-opt" onclick="selectPayTier(4,this)" style="border-color:var(--gold-dim)"><div class="ptn" style="color:var(--gold)">Pinnacle</div><div class="ptp">₹7,000/yr</div></div>
+    </div>
+
+    <!-- GST Invoice Preview -->
+    <div class="gst-box" id="gstPreview">
+      <div class="gl"><span>Subscription (excl. GST)</span><span id="gpBase">—</span></div>
+      <div class="gl"><span>CGST 9%</span><span id="gpCgst">—</span></div>
+      <div class="gl"><span>SGST 9%</span><span id="gpSgst">—</span></div>
+      <div class="gl total"><span>TOTAL</span><span id="gpTotal">Select a tier</span></div>
+    </div>
+
+    <!-- Payment Method Tabs -->
+    <div class="pay-tabs" style="margin-top:16px">
+      <div class="pay-tab on" onclick="payTab('razorpay',this)">RAZORPAY</div>
+      <div class="pay-tab" onclick="payTab('stripe',this)">STRIPE</div>
+      <div class="pay-tab" onclick="payTab('upi',this)">UPI / QR</div>
+    </div>
+
+    <!-- Razorpay Pane -->
+    <div class="pay-pane on" id="pane-razorpay">
+      <input class="modal-inp" id="payEmail" placeholder="YOUR EMAIL ADDRESS" type="email">
+      <button class="modal-btn" onclick="initiateRazorpay()">PAY WITH RAZORPAY →</button>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--silver);text-align:center;letter-spacing:1px">Cards · UPI · Net Banking · Wallets · EMI</div>
+    </div>
+
+    <!-- Stripe Pane -->
+    <div class="pay-pane" id="pane-stripe">
+      <input class="modal-inp" id="payEmailStripe" placeholder="YOUR EMAIL ADDRESS" type="email">
+      <button class="modal-btn" onclick="initiateStripe()">PAY WITH STRIPE →</button>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--silver);text-align:center;letter-spacing:1px">International Cards · ACH · SEPA</div>
+    </div>
+
+    <!-- UPI Pane -->
+    <div class="pay-pane" id="pane-upi">
+      <div class="upi-qr-box">
+        <div id="qrCanvas"></div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--silver);margin-top:10px;letter-spacing:1px" id="qrMsg">SELECT A TIER TO GENERATE QR</div>
+        <div class="upi-link" id="upiLinkDisplay" style="display:none"></div>
+      </div>
+      <div class="pay-steps" id="upiSteps"></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:7.5px;color:var(--zinc);margin-top:10px;letter-spacing:.5px;line-height:1.7">
+        Near-zero MDR via direct UPI rails (0–0.3%).<br>
+        Paytm Business · PhonePe Business · Bank UPI · BHIM
+      </div>
+    </div>
+
+    <div class="modal-skip" onclick="closePayModal()">← BACK TO SENTINEL</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     TOPBAR
+════════════════════════════════════════════════ -->
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-hex">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L4 7V17L12 22L20 17V7L12 2Z" stroke="#c9a84c" stroke-width="1.2" fill="rgba(201,168,76,0.1)"/>
+        <circle cx="12" cy="12" r="2.5" fill="#c9a84c" opacity=".8"/>
+      </svg>
+    </div>
+    <div class="brand-text">
+      <div class="n">Imperial Sentinel</div>
+      <div class="s">ITI Intelligence Engine · OS V5.0</div>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <button class="nav-btn" onclick="openPayModal()">SUBSCRIBE</button>
+    <span class="tier-pill" id="topTierPill"></span>
+    <div class="status-node" id="statusNode"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     LAYOUT
+════════════════════════════════════════════════ -->
+<div class="layout">
+
+  <!-- LEFT RAIL -->
+  <div class="left-rail">
+    <button class="new-sess" onclick="newSession()">
+      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      NEW SESSION
+    </button>
+
+    <div class="rail-sec">
+      <div class="rail-label">Access Control</div>
+      <input class="f-input" id="sideKeyInput" type="text" placeholder="SENTINEL ACCESS KEY">
+      <div class="be-inp-row">
+        <input class="f-input" id="sideOpenAIKey" type="password" placeholder="OPENAI KEY / BACKEND URL">
+      </div>
+      <button class="f-btn" onclick="sideAuth()">AUTHENTICATE</button>
+      <div class="key-status" id="sideStatus">◈ AWAITING AUTHENTICATION</div>
+    </div>
+
+    <div class="rail-sec">
+      <div class="rail-label">Intelligence Tier</div>
+      <div id="tierCards">
+        <div class="tier-card locked" id="tc1"><div class="t-name">Sentinel Scout</div><div class="t-price">₹5,000/yr</div><div class="t-cap">Core Ops + Sales Execution</div><div class="t-lock">🔒</div></div>
+        <div class="tier-card locked" id="tc2"><div class="t-name">Sentinel Warden</div><div class="t-price">₹5,500/yr</div><div class="t-cap">CRM + Market Benchmarking</div><div class="t-lock">🔒</div></div>
+        <div class="tier-card locked" id="tc3"><div class="t-name">Sentinel Commander</div><div class="t-price">₹6,000/yr</div><div class="t-cap">ROI + Predictive Analytics</div><div class="t-lock">🔒</div></div>
+        <div class="tier-card locked" id="tc4"><div class="t-name">Imperial Sentinel</div><div class="t-price">₹7,000/yr · <span style="color:var(--ember)">PINNACLE</span></div><div class="t-cap">M&A · Global Strategy · Institutional</div><div class="t-lock">🔒</div></div>
+      </div>
+      <button class="f-btn" style="margin-top:10px;font-size:9px" onclick="openPayModal()">SUBSCRIBE TO UNLOCK →</button>
+    </div>
+
+    <div class="rail-sec">
+      <div class="rail-label">Session Log</div>
+      <div class="sess-list" id="sessLog"><div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--zinc);letter-spacing:1px;text-transform:uppercase">No sessions</div></div>
+    </div>
+  </div>
+
+  <!-- CHAT CENTER -->
+  <div class="chat-center" id="chatCenter">
+
+    <div class="hero" id="heroPane">
+      <div class="hero-ring">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#c9a84c"/><stop offset="100%" style="stop-color:#e8600a"/></linearGradient></defs>
+          <polygon points="50,3 97,27 97,73 50,97 3,73 3,27" fill="none" stroke="url(#rg)" stroke-width="1"/>
+          <polygon points="50,14 86,32 86,68 50,86 14,68 14,32" fill="none" stroke="url(#rg)" stroke-width=".5" opacity=".35"/>
+          <circle cx="50" cy="50" r="2.5" fill="#c9a84c" opacity=".8"/>
+        </svg>
+        <div class="hero-ring-inner">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 7V17L12 22L20 17V7L12 2Z" fill="rgba(201,168,76,0.12)" stroke="#c9a84c" stroke-width="1.2"/></svg>
+        </div>
+      </div>
+      <div class="hero-title">IMPERIAL<br><span>SENTINEL</span></div>
+      <div class="hero-tag">Guardian of Enterprise Intelligence · ITI-OS V5.0</div>
+      <div class="hero-grid">
+        <div class="h-cell"><div class="h-icon">⬡</div><div class="h-ttl">Architect</div><div class="h-desc">SaaS infrastructure design &amp; enterprise blueprints at $10B scale</div></div>
+        <div class="h-cell"><div class="h-icon">◈</div><div class="h-ttl">RevOps</div><div class="h-desc">CAC · LTV · burn · runway · break-even simulations</div></div>
+        <div class="h-cell"><div class="h-icon">⟁</div><div class="h-ttl">Strategy</div><div class="h-desc">M&amp;A intelligence · institutional advisory · global strategy</div></div>
+      </div>
+      <div class="hero-alert" id="heroAlert">◈ RESTRICTED DEMO — AUTHENTICATE OR SUBSCRIBE TO UNLOCK FULL CAPABILITIES</div>
+    </div>
+
+    <div class="msgs" id="msgsPane"></div>
+
+    <div class="typing" id="typingBar">
+      <div class="m-av s">IS</div>
+      <div><div class="tdots"><span></span><span></span><span></span></div><div style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--silver);margin-top:5px;text-transform:uppercase">Sentinel processing...</div></div>
+    </div>
+
+    <div class="input-zone">
+      <div class="qcmds" id="qcmdsBar">
+        <div class="qcmd" onclick="qs('Deploy full SaaS architecture blueprint for ITI intelligence platform')">⬡ ARCHITECTURE</div>
+        <div class="qcmd" onclick="qs('Build CAC/LTV/Burn/Runway financial model for ITI current stage')">◈ REVOPS MODEL</div>
+        <div class="qcmd" onclick="qs('Generate enterprise go-to-market strategy for ITI Sentinel product line')">⟁ GTM STRATEGY</div>
+        <div class="qcmd" onclick="qs('Build Razorpay + Stripe + UPI payment infrastructure with GST compliance for ₹7000 SaaS tier')">⊕ PAYMENT INFRA</div>
+        <div class="qcmd" onclick="qs('Generate production Node.js API for Sentinel access key validation with tier gating')">⌁ CODE DELIVERY</div>
+        <div class="qcmd" onclick="qs('Develop M&A intelligence brief and global expansion strategy for ITI')">◉ M&A INTEL</div>
+      </div>
+      <div class="inp-wrap" id="inpWrap">
+        <textarea class="chat-inp" id="chatInp" placeholder="Command Imperial Sentinel..." rows="1" onkeydown="onKey(event)" oninput="grow(this);updCC()"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="send()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          SEND
+        </button>
+      </div>
+      <div class="inp-meta">
+        <div class="inp-hint">↵ SEND · SHIFT+↵ NEW LINE</div>
+        <div class="charcnt" id="ccnt">0</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT RAIL -->
+  <div class="right-rail">
+    <div class="rr-card">
+      <div class="rr-lbl">Active Tier</div>
+      <div class="rr-val g" id="rrTier">DEMO</div>
+      <div class="rr-sub" id="rrTierSub">Restricted Mode</div>
+    </div>
+    <div class="rr-card">
+      <div class="rr-lbl">Session Tokens</div>
+      <div class="rr-val" id="rrTokens">0</div>
+      <div class="rr-sub">Total this session</div>
+    </div>
+    <div class="rr-card">
+      <div class="rr-lbl">Exchanges</div>
+      <div class="rr-val" id="rrMsgs">0</div>
+      <div class="rr-sub">Messages logged</div>
+    </div>
+    <div class="rr-card">
+      <div class="rr-lbl">Capabilities</div>
+      <div id="capRows">
+        <div class="cap-row"><div class="cdot off"></div>Financial Modeling</div>
+        <div class="cap-row"><div class="cdot off"></div>CAC / LTV Analysis</div>
+        <div class="cap-row"><div class="cdot off"></div>Revenue Scaling</div>
+        <div class="cap-row"><div class="cdot off"></div>CRM Architecture</div>
+        <div class="cap-row"><div class="cdot off"></div>Predictive Analytics</div>
+        <div class="cap-row"><div class="cdot off"></div>M&amp;A Intelligence</div>
+        <div class="cap-row"><div class="cdot off"></div>Code Delivery</div>
+        <div class="cap-row"><div class="cdot off"></div>Global Strategy</div>
+      </div>
+    </div>
+    <div class="rr-card">
+      <div class="rr-lbl">System</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ash);line-height:2;letter-spacing:.5px">
+        ENGINE · GPT-4o<br>ENTITY · ITI<br>OWNER · P.R. DASH<br>BUILD · V5.0-FINAL<br>
+        PAYMENT · Razorpay+Stripe+UPI<br>GST · AUTO
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const S = {
+  openAIKey:'', backendUrl:'', sentinelKey:'',
+  tier:0, msgs:[], sessions:[], tokens:0, msgCount:0,
+  selectedPayTier:4
+};
+
+const TIERS = {
+  0:{name:'DEMO',sub:'Restricted Mode',caps:0,price:0},
+  1:{name:'SCOUT',sub:'Core Ops + Sales',caps:3,price:5000},
+  2:{name:'WARDEN',sub:'CRM + Benchmarking',caps:5,price:5500},
+  3:{name:'COMMANDER',sub:'ROI + Predictive',caps:7,price:6000},
+  4:{name:'PINNACLE',sub:'Full Institutional Intel',caps:8,price:7000},
+};
+
+// ─────────────────────────────────────────────
+// SYSTEM PROMPT
+// ─────────────────────────────────────────────
+function sysPrompt() {
+  const t = TIERS[S.tier];
+  return `You are Imperial Sentinel, the Guardian of Enterprise Intelligence and sovereign AI engine of Imperial Tech Innovations (ITI).
+
+ACTIVE TIER: ${t.name} — ${t.sub}
+${S.tier===0?'MODE: RESTRICTED DEMO — Provide limited preview only. Direct user to subscribe for full access via the Subscribe button.':''}
+${S.tier>=4?'MODE: PINNACLE UNLOCKED — All capabilities fully active.':''}
+
+MANDATE: 100% ITI. Premium SaaS + IT Services + Advanced Business Intelligence. Absolute brand separation from Imperial Healthcare Systems.
+OWNER: Pabitra Ratan Dash | pabitrad@imperialhealthsystems.com
+TONE: Authoritative | Executive | Institutional. No generic AI language. No unnecessary explanation.
+OUTPUT: Consulting-grade, boardroom-ready deliverables every time.
+
+CAPABILITIES ACTIVE (Tier ${S.tier}):
+- Financial modeling: CAC / LTV / Burn / Runway / Break-even simulations
+- Revenue architecture: Fixed SaaS subscriptions + Hybrid add-ons (usage/advisory/performance%) + Enterprise upsells
+- Payment stack knowledge: Stripe (international/ACH), Razorpay (India primary), Briskpay (B2B redundancy), UPI Rails near-zero MDR (0-0.3%) via Paytm/PhonePe/Bank QR, Easebuzz/PayU/PayPal failover, Payoneer B2B pipeline
+- GST compliance engine: CGST/SGST (intra-state), IGST (interstate/export), auto-invoice sync with CRM + ledger, HSN/SAC 998319
+- Code delivery: Production Node.js APIs, webhook systems, payment gateway integrations, access key validation
+${S.tier>=3?'- Predictive scaling models, ROI simulations, market benchmarking':''}
+${S.tier>=4?'- M&A intelligence, global expansion strategy, institutional advisory, full enterprise architecture':''}
+
+TIER STACK:
+| Tier | Plan | Price | Capability |
+|------|------|-------|------------|
+| 1 | Sentinel Scout | ₹5,000/yr | Core Ops + Sales Execution |
+| 2 | Sentinel Warden | ₹5,500/yr | CRM + Market Benchmarking |
+| 3 | Sentinel Commander | ₹6,000/yr | ROI Modeling + Predictive Analytics |
+| 4 | Imperial Sentinel Pinnacle | ₹7,000/yr | M&A + Global Strategy + Full Intel |
+
+Every response = Boardroom-grade deliverable. Structure with headers, tables, and code blocks as appropriate. Architect. Execute. Optimize.`;
+}
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+function bootSystem() {
+  const bUrl = document.getElementById('mBackendUrl').value.trim();
+  const aiKey = document.getElementById('mOpenAIKey').value.trim();
+  const sKey = document.getElementById('mSentinelKey').value.trim();
+
+  if (!bUrl && (!aiKey || !aiKey.startsWith('sk-'))) {
+    alert('Enter either your Backend URL or a valid OpenAI API key (sk-...)');
+    return;
+  }
+
+  S.backendUrl = bUrl;
+  S.openAIKey = aiKey;
+  S.sentinelKey = sKey;
+
+  if (sKey) validateKeyLocally(sKey);
+
+  document.getElementById('initModal').classList.add('hide');
+  document.getElementById('statusNode').classList.add('live');
+  updateUI();
+  if (S.tier===0) document.getElementById('heroAlert').classList.add('show');
+}
+
+function demoMode() {
+  document.getElementById('initModal').classList.add('hide');
+  document.getElementById('statusNode').classList.add('live');
+  document.getElementById('heroAlert').classList.add('show');
+  updateUI();
+}
+
+// ─────────────────────────────────────────────
+// KEY VALIDATION
+// ─────────────────────────────────────────────
+const LOCAL_KEYS = new Map([
+  ['IS-PABITRA-2025-PINNACLE',{tier:4,label:'Imperial Sentinel Pinnacle'}],
+  ['IS-DEMO-SCOUT',{tier:1,label:'Sentinel Scout'}],
+  ['IS-DEMO-WARDEN',{tier:2,label:'Sentinel Warden'}],
+  ['IS-DEMO-COMMANDER',{tier:3,label:'Sentinel Commander'}],
+]);
+
+function validateKeyLocally(key) {
+  const match = LOCAL_KEYS.get(key);
+  if (match) { S.tier = match.tier; return true; }
+  return false;
+}
+
+function sideAuth() {
+  const sKey = document.getElementById('sideKeyInput').value.trim();
+  const apiKey = document.getElementById('sideOpenAIKey').value.trim();
+  const st = document.getElementById('sideStatus');
+
+  if (apiKey) {
+    if (apiKey.startsWith('http')) S.backendUrl = apiKey;
+    else if (apiKey.startsWith('sk-')) S.openAIKey = apiKey;
+  }
+
+  if (sKey) {
+    const ok = validateKeyLocally(sKey);
+    S.sentinelKey = sKey;
+    if (ok) {
+      st.className='key-status ok';
+      st.textContent=`◈ AUTHENTICATED · ${TIERS[S.tier].name} ACTIVE`;
+      document.getElementById('heroAlert').classList.remove('show');
+    } else {
+      st.className='key-status err';
+      st.textContent='◈ INVALID SENTINEL KEY';
+      S.tier=0;
+    }
+  } else {
+    st.className='key-status';
+    st.textContent = S.openAIKey||S.backendUrl ? '◈ API CONFIGURED · DEMO MODE' : '◈ ENTER API CREDENTIALS';
+  }
+
+  document.getElementById('statusNode').classList.add('live');
+  updateUI();
+}
+
+// ─────────────────────────────────────────────
+// UI UPDATE
+// ─────────────────────────────────────────────
+function updateUI() {
+  const t = S.tier;
+  const meta = TIERS[t];
+
+  document.getElementById('rrTier').textContent = meta.name;
+  document.getElementById('rrTierSub').textContent = meta.sub;
+
+  const pill = document.getElementById('topTierPill');
+  pill.textContent = meta.name;
+  pill.classList.add('show');
+
+  for(let i=1;i<=4;i++){
+    const c=document.getElementById('tc'+i);
+    const lk=c.querySelector('.t-lock');
+    if(i<=t){c.classList.remove('locked');lk.textContent='✓';lk.className='t-lock t-check';}
+    else{c.classList.add('locked');lk.textContent='🔒';lk.className='t-lock';}
+    c.classList.remove('selected');
+  }
+  if(t>0) document.getElementById('tc'+t).classList.add('selected');
+
+  const dots=document.querySelectorAll('.cdot');
+  dots.forEach((d,i)=>{
+    d.className = i < meta.caps ? 'cdot on' : 'cdot off';
+  });
+}
+
+// ─────────────────────────────────────────────
+// MESSAGING
+// ─────────────────────────────────────────────
+async function send() {
+  const inp=document.getElementById('chatInp');
+  const txt=inp.value.trim();
+  if(!txt) return;
+  if(!S.openAIKey && !S.backendUrl){
+    openInitModal();
+    return;
+  }
+
+  inp.value=''; grow(inp); updCC();
+  document.getElementById('heroPane').style.display='none';
+  document.getElementById('msgsPane').classList.add('on');
+
+  addMsg('user',txt);
+  S.msgs.push({role:'user',content:txt});
+  S.msgCount++;
+  document.getElementById('rrMsgs').textContent=S.msgCount;
+
+  document.getElementById('sendBtn').disabled=true;
+  document.getElementById('typingBar').classList.add('on');
+
+  try {
+    let reply, usage;
+
+    if(S.backendUrl) {
+      // BACKEND MODE — secure
+      const r = await fetch(S.backendUrl+'/api/chat',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({messages:S.msgs, sentinelKey:S.sentinelKey})
+      });
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.error||'Backend error');
+      reply=d.reply; usage=d.usage;
+      if(d.tier !== undefined && d.tier > S.tier){ S.tier=d.tier; updateUI(); }
+
+    } else {
+      // DIRECT MODE
+      const maxTok = S.tier>=4?4000:S.tier>=2?2000:800;
+      const r = await fetch('https://api.openai.com/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+S.openAIKey},
+        body:JSON.stringify({model:'gpt-4o',messages:[{role:'system',content:sysPrompt()},...S.msgs],max_tokens:maxTok,temperature:0.7})
+      });
+      const d=await r.json();
+      if(!r.ok) throw new Error(d.error?.message||'OpenAI error');
+      reply=d.choices[0].message.content;
+      usage=d.usage;
+    }
+
+    S.msgs.push({role:'assistant',content:reply});
+    if(usage){S.tokens+=usage.total_tokens||0;document.getElementById('rrTokens').textContent=S.tokens.toLocaleString();}
+    document.getElementById('typingBar').classList.remove('on');
+    addMsg('assistant',reply);
+    logSession(txt);
+
+  } catch(e) {
+    document.getElementById('typingBar').classList.remove('on');
+    addMsg('assistant','◈ SENTINEL SYSTEM ERROR\n\n'+e.message+'\n\nVerify credentials and connection status.');
+  }
+
+  document.getElementById('sendBtn').disabled=false;
+  document.getElementById('msgsPane').scrollTop=999999;
+}
+
+function addMsg(role, content) {
+  const pane=document.getElementById('msgsPane');
+  const div=document.createElement('div');
+  div.className='msg';
+  const isU=role==='user';
+  div.innerHTML=`<div class="m-av ${isU?'u':'s'}">${isU?'YOU':'IS'}</div>
+  <div class="m-body">
+    <div class="m-role ${isU?'':'sr'}">${isU?'OPERATOR':'IMPERIAL SENTINEL'}</div>
+    <div class="m-text">${md(content)}</div>
+  </div>`;
+  pane.appendChild(div);
+  pane.scrollTop=pane.scrollHeight;
+}
+
+function md(t) {
+  let h=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h=h.replace(/```(\w*)\n?([\s\S]*?)```/g,(_,l,c)=>`<div class="copy-wrap"><pre><code>${c.trim()}</code></pre><button class="cpbtn" onclick="cp(this)">COPY</button></div>`);
+  h=h.replace(/`([^`]+)`/g,'<code>$1</code>');
+  h=h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h=h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h=h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  h=h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h=h.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  // Tables
+  h=h.replace(/(\|.+\|\r?\n\|[-| :]+\|\r?\n(?:\|.+\|\r?\n?)+)/g,(m)=>{
+    const rows=m.trim().split('\n');
+    const hs=rows[0].split('|').slice(1,-1);
+    const body=rows.slice(2);
+    let tbl='<table><thead><tr>'+hs.map(c=>`<th>${c.trim()}</th>`).join('')+'</tr></thead><tbody>';
+    body.forEach(r=>{const cs=r.split('|').slice(1,-1);tbl+='<tr>'+cs.map(c=>`<td>${c.trim()}</td>`).join('')+'</tr>';});
+    return tbl+'</tbody></table>';
+  });
+  h=h.replace(/^[-•] (.+)$/gm,'<li>$1</li>');
+  h=h.replace(/^\d+\. (.+)$/gm,'<li>$1</li>');
+  h=h.replace(/\n\n/g,'</p><p>');
+  h=h.replace(/\n/g,'<br>');
+  return h;
+}
+
+function cp(btn){
+  navigator.clipboard.writeText(btn.previousElementSibling.querySelector('code').textContent)
+    .then(()=>{btn.textContent='COPIED';setTimeout(()=>btn.textContent='COPY',2000)});
+}
+
+function qs(t){document.getElementById('chatInp').value=t;send();}
+function onKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}}
+function grow(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
+function updCC(){document.getElementById('ccnt').textContent=document.getElementById('chatInp').value.length;}
+
+// ─────────────────────────────────────────────
+// SESSIONS
+// ─────────────────────────────────────────────
+function logSession(first) {
+  if(S.msgs.length===2){
+    S.sessions.unshift({id:Date.now(),title:first.slice(0,38)+(first.length>38?'...':''),msgs:[...S.msgs]});
+    renderSessions();
+  }
+}
+function renderSessions(){
+  const el=document.getElementById('sessLog');
+  if(!S.sessions.length){el.innerHTML='<div style="font-family:JetBrains Mono,monospace;font-size:8.5px;color:var(--zinc);letter-spacing:1px;text-transform:uppercase">No sessions</div>';return;}
+  el.innerHTML=S.sessions.slice(0,10).map((s,i)=>`<div class="sess-item${i===0?' cur':''}" onclick="loadSess(${s.id})">${s.title}</div>`).join('');
+}
+function loadSess(id){
+  const s=S.sessions.find(x=>x.id===id);if(!s)return;
+  S.msgs=[...s.msgs];
+  document.getElementById('heroPane').style.display='none';
+  document.getElementById('msgsPane').classList.add('on');
+  document.getElementById('msgsPane').innerHTML='';
+  s.msgs.forEach(m=>addMsg(m.role,m.content));
+}
+function newSession(){
+  S.msgs=[];
+  document.getElementById('heroPane').style.display='';
+  document.getElementById('msgsPane').classList.remove('on');
+  document.getElementById('msgsPane').innerHTML='';
+  document.getElementById('chatInp').value='';
+}
+
+// ─────────────────────────────────────────────
+// PAYMENT MODAL
+// ─────────────────────────────────────────────
+function openPayModal(){document.getElementById('payModal').classList.remove('hide');}
+function closePayModal(){document.getElementById('payModal').classList.add('hide');}
+function openInitModal(){document.getElementById('initModal').classList.remove('hide');}
+
+function payTab(id,el){
+  document.querySelectorAll('.pay-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.pay-pane').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('pane-'+id).classList.add('on');
+  if(id==='upi') renderUPIQR();
+}
+
+function selectPayTier(tier,el){
+  S.selectedPayTier=tier;
+  document.querySelectorAll('.pay-tier-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  updateGSTPreview(tier);
+  renderUPIQR();
+}
+
+function updateGSTPreview(tier){
+  const prices={1:5000,2:5500,3:6000,4:7000};
+  const total=prices[tier]||0;
+  const base=+(total/1.18).toFixed(0);
+  const gst=total-base;
+  const half=+(gst/2).toFixed(0);
+  document.getElementById('gpBase').textContent='₹'+base.toLocaleString();
+  document.getElementById('gpCgst').textContent='₹'+half.toLocaleString();
+  document.getElementById('gpSgst').textContent='₹'+half.toLocaleString();
+  document.getElementById('gpTotal').textContent='₹'+total.toLocaleString()+' INR';
+}
+
+function renderUPIQR(){
+  const prices={1:5000,2:5500,3:6000,4:7000};
+  const names={1:'Sentinel Scout',2:'Sentinel Warden',3:'Sentinel Commander',4:'Imperial Sentinel Pinnacle'};
+  const tier=S.selectedPayTier;
+  const amount=prices[tier];
+  const upiId='imperialtech@paytm'; // UPDATE WITH YOUR REAL UPI VPA
+  const upiLink=`upi://pay?pa=${upiId}&pn=Imperial+Tech+Innovations&am=${amount}&cu=INR&tn=${encodeURIComponent(names[tier])}`;
+
+  document.getElementById('qrCanvas').innerHTML='';
+  if(typeof QRCode!=='undefined' && tier){
+    new QRCode(document.getElementById('qrCanvas'),{text:upiLink,width:160,height:160,colorDark:'#c9a84c',colorLight:'#080a0d',correctLevel:QRCode.CorrectLevel.M});
+    document.getElementById('qrMsg').textContent=`₹${amount.toLocaleString()} — ${names[tier]}`;
+    document.getElementById('upiLinkDisplay').textContent=upiLink;
+    document.getElementById('upiLinkDisplay').style.display='block';
+  }
+
+  const steps=[
+    'Scan QR with Paytm / PhonePe / GPay / BHIM / any UPI app',
+    'Complete payment of ₹'+(amount||'—'),
+    'Add note: '+names[tier]+' · [your email]',
+    'Screenshot → pabitrad@imperialhealthsystems.com',
+    'Sentinel Access Key delivered within 2 business hours'
+  ];
+  document.getElementById('upiSteps').innerHTML=steps.map((s,i)=>`<div class="pay-step"><div class="pay-step-n">${i+1}.</div><div>${s}</div></div>`).join('');
+}
+
+async function initiateRazorpay(){
+  const email=document.getElementById('payEmail').value.trim();
+  const tier=S.selectedPayTier;
+  if(!email){alert('Enter your email address');return;}
+  if(!S.backendUrl){alert('Backend URL required for Razorpay integration. See server.js setup guide.');return;}
+
+  try{
+    const r=await fetch(S.backendUrl+'/api/payment/razorpay/create-order',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tier,email})
+    });
+    const d=await r.json();
+    if(!r.ok)throw new Error(d.error);
+
+    const options={
+      key:d.razorpayKeyId,amount:d.amount,currency:d.currency,
+      name:'Imperial Tech Innovations',description:d.tierName+' — Annual Subscription',
+      order_id:d.orderId,
+      handler:function(res){
+        alert('Payment successful! Sentinel key will be emailed to '+email+' within 2 hours.');
+        closePayModal();
+      },
+      prefill:{email},
+      theme:{color:'#c9a84c'}
+    };
+    const rzp=new window.Razorpay(options);
+    rzp.open();
+  }catch(e){alert('Payment init failed: '+e.message);}
+}
+
+async function initiateStripe(){
+  const email=document.getElementById('payEmailStripe').value.trim();
+  if(!email){alert('Enter your email address');return;}
+  if(!S.backendUrl){alert('Backend URL required for Stripe integration.');return;}
+  alert('Stripe Checkout: Integrate Stripe.js with the client secret from your backend /api/payment/stripe/create-intent endpoint. See server.js for full implementation.');
+}
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+window.onload=()=>{
+  document.getElementById('initModal').classList.remove('hide');
+  selectPayTier(4,document.querySelector('.pay-tier-opt:last-child'));
+};
+</script>
+</body>
+</html>
